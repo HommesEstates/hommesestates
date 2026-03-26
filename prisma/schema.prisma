@@ -1,0 +1,403 @@
+// Hommes Estates CMS Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// AUTHENTICATION & USERS
+// ============================================
+
+enum UserRole {
+  ADMIN
+  EDITOR
+  DESIGNER
+  PROPERTY_MANAGER
+  VIEWER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String
+  role          UserRole  @default(VIEWER)
+  avatar        String?
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  pages         Page[]
+  sections      Section[]
+  media         Media[]
+  seoSettings   SeoSettings[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+  @@index([role])
+}
+
+// ============================================
+// PAGES & SECTIONS
+// ============================================
+
+enum PageStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Page {
+  id          String      @id @default(cuid())
+  slug        String      @unique
+  title       String
+  description String?
+  status      PageStatus  @default(DRAFT)
+  isHomepage  Boolean     @default(false)
+  order       Int         @default(0)
+  publishedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  authorId    String
+  author      User        @relation(fields: [authorId], references: [id])
+
+  // Relations
+  sections    Section[]
+  seoSettings SeoSettings?
+
+  @@index([slug])
+  @@index([status])
+}
+
+enum SectionType {
+  HERO
+  TEXT_BLOCK
+  IMAGE_GALLERY
+  VIDEO
+  CAROUSEL
+  TESTIMONIALS
+  PARTNERS
+  CTA
+  FEATURES
+  STATS
+  CONTACT_FORM
+  MAP
+  PROPERTIES_GRID
+  CUSTOM
+}
+
+model Section {
+  id        String      @id @default(cuid())
+  pageId    String
+  page      Page        @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  type      SectionType
+  title     String?
+  order     Int         @default(0)
+  isVisible Boolean     @default(true)
+  content   Json        // Flexible JSON for section-specific data
+  styles    Json?       // Custom styles/classes
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  authorId  String
+  author    User        @relation(fields: [authorId], references: [id])
+
+  @@index([pageId])
+  @@index([type])
+}
+
+// ============================================
+// MEDIA LIBRARY
+// ============================================
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  RENDER_3D
+  MODEL_3D
+}
+
+enum MediaCategory {
+  BANNER
+  PROPERTY
+  TEAM
+  LOGO
+  ICON
+  RENDER
+  FLOOR_PLAN
+  TESTIMONIAL
+  PARTNER
+  OTHER
+}
+
+model Media {
+  id           String        @id @default(cuid())
+  filename     String
+  originalName String
+  url          String
+  thumbnailUrl String?
+  type         MediaType
+  category     MediaCategory @default(OTHER)
+  mimeType     String
+  size         Int           // bytes
+  width        Int?
+  height       Int?
+  alt          String?
+  caption      String?
+  tags         String[]
+  uploadedById String
+  uploadedBy   User          @relation(fields: [uploadedById], references: [id])
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  // Relations
+  propertyImages PropertyMedia[]
+
+  @@index([type])
+  @@index([category])
+  @@index([uploadedById])
+}
+
+// ============================================
+// PROPERTIES (Odoo Integration)
+// ============================================
+
+model Property {
+  id                String          @id @default(cuid())
+  odooId            Int?            @unique // Reference to Odoo property ID
+  name              String
+  slug              String          @unique
+  description       String?
+  propertyType      String
+  location          String
+  address           String?
+  price             Float
+  currency          String          @default("NGN")
+  bedrooms          Int?
+  bathrooms         Int?
+  area              Float
+  areaUnit          String          @default("sqm")
+  status            String
+  featured          Boolean         @default(false)
+  investmentReady   Boolean         @default(false)
+  amenities         String[]
+  highlights        String[]
+  virtualTourUrl    String?
+  floorPlanUrl      String?
+  model3dUrl        String?
+  lastSyncedAt      DateTime?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  // Relations
+  media             PropertyMedia[]
+  investmentDetails InvestmentDetails?
+
+  @@index([odooId])
+  @@index([slug])
+  @@index([status])
+  @@index([featured])
+}
+
+model PropertyMedia {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  mediaId    String
+  media      Media    @relation(fields: [mediaId], references: [id])
+  order      Int      @default(0)
+  isCover    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId])
+  @@index([mediaId])
+}
+
+model InvestmentDetails {
+  id                      String   @id @default(cuid())
+  propertyId              String   @unique
+  property                Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  projectedRentalYield    Float?
+  appreciationRate        Float?
+  minimumInvestment       Float?
+  expectedROI             Float?
+  investmentHorizon       String?
+  paymentPlan             Json?
+  riskLevel               String?
+  completionDate          DateTime?
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+// ============================================
+// TESTIMONIALS & PARTNERS
+// ============================================
+
+model Testimonial {
+  id        String   @id @default(cuid())
+  name      String
+  role      String?
+  company   String?
+  quote     String
+  rating    Int?     @default(5)
+  avatarUrl String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String
+  website   String?
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+}
+
+// ============================================
+// SEO & METADATA
+// ============================================
+
+model SeoSettings {
+  id              String   @id @default(cuid())
+  pageId          String   @unique
+  page            Page     @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  metaTitle       String
+  metaDescription String
+  keywords        String[]
+  ogTitle         String?
+  ogDescription   String?
+  ogImage         String?
+  twitterCard     String?
+  canonicalUrl    String?
+  noindex         Boolean  @default(false)
+  nofollow        Boolean  @default(false)
+  structuredData  Json?    // JSON-LD
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  authorId        String
+  author          User     @relation(fields: [authorId], references: [id])
+
+  @@index([pageId])
+}
+
+// ============================================
+// THEME & SETTINGS
+// ============================================
+
+model ThemeSettings {
+  id                String   @id @default(cuid())
+  name              String   @unique
+  colors            Json     // Primary, secondary, accent, etc.
+  typography        Json     // Font families, sizes
+  spacing           Json     // Padding, margins
+  borderRadius      Json
+  animations        Json     // Transition speeds, effects
+  layout            Json     // Max widths, breakpoints
+  isActive          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                  String   @id @default(cuid())
+  siteName            String   @default("Hommes Estates")
+  tagline             String?
+  logo                String?
+  favicon             String?
+  contactEmail        String?
+  contactPhone        String?
+  address             String?
+  socialLinks         Json?    // Facebook, Twitter, Instagram, LinkedIn
+  googleAnalyticsId   String?
+  googleMapsApiKey    String?
+  odooApiUrl          String?
+  odooApiKey          String?
+  maintenanceMode     Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+// ============================================
+// AUDIT & ANALYTICS
+// ============================================
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  PUBLISH
+  UNPUBLISH
+  LOGIN
+  LOGOUT
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  action      AuditAction
+  entityType  String      // Page, Section, Media, etc.
+  entityId    String?
+  changes     Json?       // Before/after data
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model PerformanceMetric {
+  id                    String   @id @default(cuid())
+  pageUrl               String
+  performanceScore      Int?
+  accessibilityScore    Int?
+  bestPracticesScore    Int?
+  seoScore              Int?
+  firstContentfulPaint  Int?     // milliseconds
+  largestContentfulPaint Int?
+  cumulativeLayoutShift Float?
+  totalBlockingTime     Int?
+  speedIndex            Int?
+  createdAt             DateTime @default(now())
+
+  @@index([pageUrl])
+  @@index([createdAt])
+}
+
+// ============================================
+// NAVIGATION LINKS
+// ============================================
+
+model NavigationLink {
+  id        String   @id @default(cuid())
+  location  String
+  label     String
+  href     String
+  position  Int      @default(0)
+  visible   Boolean  @default(true)
+  parentId  String?
+  parent    NavigationLink? @relation("NavParent", fields: [parentId], references: [id])
+  children  NavigationLink[] @relation("NavParent")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([location])
+  @@index([parentId])
+}

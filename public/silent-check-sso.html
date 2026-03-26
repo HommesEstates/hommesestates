@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Silent SSO</title>
+  </head>
+  <body>
+    <script>
+      try {
+        // Allow Keycloak to complete the silent SSO check by posting back the URL
+        parent.postMessage(location.href, location.origin);
+      } catch (e) {}
+    </script>
+  </body>
+</html>

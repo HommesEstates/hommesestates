@@ -1,0 +1,6 @@
+@echo off
+echo Starting FastAPI Backend...
+echo Using virtual environment...
+cd /d "%~dp0"
+c:\Users\Testimony Adegoke\CascadeProjects\hommesestates\.venv\Scripts\uvicorn.exe app.main:app --reload --port 8000
+pause

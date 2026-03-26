@@ -1,0 +1,122 @@
+# Production Docker Compose configuration
+
+version: '3.8'
+
+services:
+  # FastAPI Backend
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: hommesestates-backend-prod
+    environment:
+      - APP_DATABASE_URL=postgresql://hommesestates:${DB_PASSWORD}@postgres:5432/hommesestates
+      - APP_REDIS_URL=redis://redis:6379
+      - APP_JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - APP_FRONTEND_URL=${FRONTEND_URL}
+      - APP_BACKEND_URL=${BACKEND_URL}
+      - APP_SMTP_HOST=${SMTP_HOST}
+      - APP_SMTP_PORT=${SMTP_PORT}
+      - APP_SMTP_USER=${SMTP_USER}
+      - APP_SMTP_PASSWORD=${SMTP_PASSWORD}
+      - APP_EMAIL_FROM=${EMAIL_FROM}
+    volumes:
+      - storage_data:/app/storage
+      - ./logs:/app/logs
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+    networks:
+      - hommesestates-network
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.5'
+        reservations:
+          memory: 256M
+          cpus: '0.25'
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hommesestates-postgres-prod
+    environment:
+      - POSTGRES_DB=hommesestates
+      - POSTGRES_USER=hommesestates
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks:
+      - hommesestates-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: hommesestates-redis-prod
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - hommesestates-network
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.25'
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: hommesestates-nginx-prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - storage_data:/var/www/storage:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - hommesestates-network
+
+  # Backup service
+  backup:
+    image: postgres:15-alpine
+    container_name: hommesestates-backup
+    environment:
+      - PGPASSWORD=${DB_PASSWORD}
+    volumes:
+      - backup_data:/backups
+      - ./scripts/backup.sh:/backup.sh
+    depends_on:
+      - postgres
+    networks:
+      - hommesestates-network
+    command: /bin/sh -c "chmod +x /backup.sh && crond -f"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  storage_data:
+    driver: local
+  backup_data:
+    driver: local
+
+networks:
+  hommesestates-network:
+    driver: bridge

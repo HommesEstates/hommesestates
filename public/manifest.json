@@ -1,0 +1,11 @@
+{
+  "name": "Hommes Estates & Facilities Management",
+  "short_name": "Hommes",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#CC5500",
+  "icons": [
+    { "src": "/favicon.svg", "type": "image/svg+xml", "sizes": "any" }
+  ]
+}
