@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const raw = params.id
+    const { id: raw } = await params
     const key: any = Number.isNaN(Number(raw)) ? raw : Number(raw)
     const body = await req.json()
     const data: any = {}
@@ -19,9 +19,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const raw = params.id
+    const { id: raw } = await params
     const key: any = Number.isNaN(Number(raw)) ? raw : Number(raw)
     await prisma.partner.delete({ where: { id: key } as any })
     return NextResponse.json({ ok: true })

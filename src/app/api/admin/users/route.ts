@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { hashPassword } from '@/lib/auth'
-import { requireAuth } from '@/lib/auth-server'
+import { getSession, requireAuth } from '@/lib/auth-server'
+import { hasPermission } from '@/lib/auth'
 
 // POST /api/admin/users - Create new admin user
 export async function POST(request: NextRequest) {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         email,
-        password: hashedPassword,
+        passwordHash: hashedPassword,
         role,
       },
       select: {
@@ -119,7 +120,7 @@ export async function GET(request: NextRequest) {
         email: true,
         role: true,
         createdAt: true,
-        lastLogin: true,
+        lastLoginAt: true,
       },
       orderBy: {
         createdAt: 'desc',

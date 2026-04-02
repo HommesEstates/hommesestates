@@ -5,8 +5,8 @@ import { pagesCountQuery, recentEditsQuery } from '@/lib/queries'
 
 export default async function CmsAdminDashboard() {
   const [pagesCount, recent] = await Promise.all([
-    sanityClient.fetch<number>(pagesCountQuery),
-    sanityClient.fetch<any[]>(recentEditsQuery),
+    (sanityClient.fetch as any)(pagesCountQuery) as Promise<number>,
+    (sanityClient.fetch as any)(recentEditsQuery) as Promise<any[]>,
   ])
 
   return (

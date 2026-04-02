@@ -8,6 +8,10 @@ const getSchema = z.object({ slug: z.string().min(1), key: z.string().min(1) })
 const postSchema = z.object({ slug: z.string().min(1), key: z.string().min(1), type: z.string().min(1), defaults: z.any() })
 
 export async function GET(req: NextRequest) {
+  const session = await getSession()
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!hasPermission(session.role, 'EDITOR')) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const { searchParams } = new URL(req.url)
   const parse = getSchema.safeParse({ slug: searchParams.get('slug'), key: searchParams.get('key') })
   if (!parse.success) return NextResponse.json({ error: 'Invalid params' }, { status: 400 })

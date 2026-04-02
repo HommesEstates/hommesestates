@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getSession, hasPermission } from '@/lib/auth'
+import { getSession } from '@/lib/auth-server'
+import { hasPermission } from '@/lib/auth'
 
 const createSchema = z.object({
   name: z.string().min(1),

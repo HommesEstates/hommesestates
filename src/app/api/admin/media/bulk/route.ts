@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getSession } from '@/lib/auth'
+import { getSession } from '@/lib/auth-server'
+import { hasPermission } from '@/lib/auth'
 import path from 'path'
 import { promises as fs } from 'fs'
 

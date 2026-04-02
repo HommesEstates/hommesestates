@@ -1,6 +1,5 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
-import { cookies } from 'next/headers'
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key-min-32-characters-long'
@@ -42,13 +41,6 @@ export async function verifySession(token: string): Promise<SessionUser | null> 
   } catch {
     return null
   }
-}
-
-export async function getSession(): Promise<SessionUser | null> {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('auth-token')?.value
-  if (!token) return null
-  return verifySession(token)
 }
 
 export function hasPermission(

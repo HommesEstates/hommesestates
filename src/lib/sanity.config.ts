@@ -11,9 +11,7 @@ if (projectId) {
 } else {
   client = {
     fetch: async () => null,
-    withConfig: () => client,
-    config: () => ({ projectId: undefined, dataset, apiVersion }),
-  } as any
+  }
 }
 
-export const sanityClient = client
+export const sanityClient = client as any
