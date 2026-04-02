@@ -88,8 +88,9 @@ export function ServicesOverview() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: index * 0.1 }}
-            className="group p-8 bg-white dark:bg-neutral-800 rounded-2xl shadow-lg card-hover"
+            className="group p-8 bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-3xl shadow-2xl transition-all duration-500 hover:scale-[1.02] hover:shadow-orange-500/10 dark:hover:shadow-[0_0_30px_rgba(249,115,22,0.15)] overflow-hidden relative"
           >
+            <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-orange-500/5 dark:to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             <div className="flex items-start gap-4 mb-4">
               <div className="p-4 bg-copper-gradient rounded-xl group-hover:scale-110 transition-transform duration-300">
                 <service.icon className="w-6 h-6 text-white" />

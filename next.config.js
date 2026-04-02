@@ -3,14 +3,13 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8069',
+        protocol: 'https',
+        hostname: 'www.hommesestates.com',
         pathname: '/web/image/**',
       },
       {
         protocol: 'https',
-        hostname: 'your-odoo-domain.com',
+        hostname: 'hommesestates.com',
         pathname: '/web/image/**',
       },
     ],
@@ -30,18 +29,10 @@ const nextConfig = {
         source: '/api/backend/:path*',
         destination: `${backendUrl}/:path*`,
       },
-      // Odoo API routes (when Odoo is available)
-      {
-        source: '/api/odoo/:path*',
-        destination: `${base}/:path*${suffix}`,
-      },
+      // Odoo image/content routes (not API - for direct resource access)
       {
         source: '/web/:path*',
         destination: `${base}/web/:path*${suffix}`,
-      },
-      {
-        source: '/odoo/:path*',
-        destination: `${base}/:path*${suffix}`,
       },
       // Map common favicon requests to our SVG
       {

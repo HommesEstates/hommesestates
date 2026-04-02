@@ -71,7 +71,8 @@ export default function AdminLogin() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-white/80 dark:bg-neutral-800/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-neutral-200 dark:border-neutral-700 p-8"
+          className="bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl rounded-3xl p-8"
+          style={{ boxShadow: '0 4px 24px -4px rgba(16, 24, 40, 0.08)' }}
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email */}
@@ -86,7 +87,7 @@ export default function AdminLogin() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-surface rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
                   placeholder="admin@hommesestates.com"
                 />
               </div>
@@ -104,19 +105,15 @@ export default function AdminLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-12 pr-12 py-3 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-surface rounded-xl focus:outline-none focus:ring-2 focus:ring-accent/20 transition-all"
                   placeholder="Enter your password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text/40 dark:text-white/40 hover:text-accent transition-colors"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-text/40 dark:text-white/40 hover:text-text dark:hover:text-white transition-colors"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -125,18 +122,21 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-copper-gradient text-white font-semibold rounded-xl hover:shadow-xl hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent-dark text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <Lock className="w-5 h-5" />
+                  Sign In
+                </>
+              )}
             </button>
           </form>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-text/60 dark:text-white/60">
-              Protected by enterprise-grade security
-            </p>
-          </div>
         </motion.div>
 
         {/* Additional Info */}

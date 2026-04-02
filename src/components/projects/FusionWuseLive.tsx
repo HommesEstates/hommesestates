@@ -77,10 +77,10 @@ export function FusionWuseLive({ propertyId: propId, propertyName = 'Fusion Wuse
     <>
       <ProjectStats stats={stats as any} />
 
-      <section className="section-container">
+      <section className="section-container bg-bg dark:bg-[#030712] transition-colors duration-500">
         <div className="text-center mb-12">
-          <h2 className="text-h2 font-heading font-bold mb-4">Interactive Floor Plan</h2>
-          <p className="text-lg text-text/70 max-w-2xl mx-auto">
+          <h2 className="text-h2 font-heading font-bold mb-4 text-text dark:text-white transition-colors duration-500">Interactive Floor Plan</h2>
+          <p className="text-lg text-text/70 dark:text-white/70 max-w-2xl mx-auto transition-colors duration-500">
             Explore available suites by floor. Click a unit to view pricing and availability in real time.
           </p>
         </div>
@@ -93,10 +93,10 @@ export function FusionWuseLive({ propertyId: propId, propertyName = 'Fusion Wuse
         )}
       </section>
 
-      <section className="section-container bg-surface">
+      <section className="section-container bg-surface dark:bg-[#0a0a0a] transition-colors duration-500">
         <div className="text-center mb-12">
-          <h2 className="text-h2 font-heading font-bold mb-4">Virtual Tour & 3D View</h2>
-          <p className="text-lg text-text/70 max-w-2xl mx-auto">Experience the property in 3D or explore the photo gallery.</p>
+          <h2 className="text-h2 font-heading font-bold mb-4 text-text dark:text-white transition-colors duration-500">Virtual Tour & 3D View</h2>
+          <p className="text-lg text-text/70 dark:text-white/70 max-w-2xl mx-auto transition-colors duration-500">Experience the property in 3D or explore the photo gallery.</p>
         </div>
         <PropertyViewer3D
           propertyName={detail?.name || propertyName}

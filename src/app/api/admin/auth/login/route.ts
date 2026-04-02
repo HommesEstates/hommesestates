@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { verifyPassword, createSession, setSessionCookie } from '@/lib/auth'
+import { verifyPassword, createSession } from '@/lib/auth'
+import { setSessionCookie } from '@/lib/auth-server'
 import { z } from 'zod'
 
 const loginSchema = z.object({

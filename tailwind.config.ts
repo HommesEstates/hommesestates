@@ -6,7 +6,7 @@ const config: Config = {
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: ['class', 'class'],
+  darkMode: 'class',
   theme: {
   	extend: {
   		colors: {
@@ -79,6 +79,10 @@ const config: Config = {
   				'Montserrat',
   				'system-ui',
   				'sans-serif'
+  			],
+  			display: [
+  				'Cormorant Garamond',
+  				'serif'
   			]
   		},
   		fontSize: {

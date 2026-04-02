@@ -23,7 +23,7 @@ export function CTABanner() {
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        className="relative overflow-hidden rounded-3xl bg-copper-gradient p-12 md:p-16 text-center"
+        className="relative overflow-hidden rounded-3xl bg-copper-gradient dark:bg-none dark:bg-white/5 dark:backdrop-blur-xl dark:border dark:border-white/10 p-12 md:p-16 text-center transition-colors duration-500"
       >
         {/* Decorative Elements */}
         <div className="absolute inset-0 opacity-10">
@@ -50,14 +50,14 @@ export function CTABanner() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/properties"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white text-accent rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-300 font-semibold"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white dark:bg-white/10 text-accent dark:text-white rounded-xl hover:shadow-xl dark:hover:bg-white/20 hover:scale-105 transition-all duration-300 font-semibold backdrop-blur-md"
             >
               View Properties
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg hover:bg-white hover:text-accent transition-all duration-300 font-semibold"
+              className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent border-2 border-white dark:border-white/20 text-white rounded-xl hover:bg-white dark:hover:bg-white/10 hover:text-accent dark:hover:text-white transition-all duration-300 font-semibold"
             >
               <Calendar className="w-5 h-5" />
               Schedule Consultation

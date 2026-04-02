@@ -25,7 +25,7 @@ export function ProjectAmenities() {
         <h2 className="text-h2 font-heading font-bold mb-4">
           World-Class Amenities
         </h2>
-        <p className="text-lg text-text/70 max-w-2xl mx-auto">
+        <p className="text-lg text-text/70 dark:text-white/70 max-w-2xl mx-auto">
           Every detail designed for comfort, productivity, and peace of mind.
         </p>
       </div>
@@ -39,15 +39,15 @@ export function ProjectAmenities() {
             viewport={{ once: true }}
             transition={{ delay: index * 0.05 }}
             whileHover={{ scale: 1.05, y: -5 }}
-            className="p-6 bg-white dark:bg-charcoal rounded-xl shadow-lg hover:shadow-2xl transition-all cursor-pointer"
+            className="p-6 bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-gray-200 dark:border-white/10 rounded-2xl shadow-lg hover:shadow-2xl hover:border-orange-500/50 dark:hover:border-orange-500/50 transition-all cursor-pointer group"
           >
-            <div className="text-accent mb-4">
+            <div className="text-accent mb-4 group-hover:scale-110 transition-transform duration-300">
               {amenity.icon}
             </div>
-            <h3 className="font-heading font-semibold mb-2">
+            <h3 className="font-heading font-semibold mb-2 text-gray-900 dark:text-white">
               {amenity.name}
             </h3>
-            <p className="text-sm text-text/60">
+            <p className="text-sm text-text/60 dark:text-white/60 font-light">
               {amenity.description}
             </p>
           </motion.div>

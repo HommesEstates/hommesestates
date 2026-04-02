@@ -12,6 +12,8 @@ import { PropertyViewer3D } from "@/components/projects/PropertyViewer3D"
 import { ProjectStats } from "@/components/projects/ProjectStats"
 import { InvestmentROI } from "@/components/projects/InvestmentROI"
 import { ProjectAmenities } from "@/components/projects/ProjectAmenities"
+import { motion } from "framer-motion"
+import { ArrowLeft, MapPin } from "lucide-react"
 
 export default function PropertyDetailPage() {
   const params = useParams() as { id?: string }
@@ -19,8 +21,6 @@ export default function PropertyDetailPage() {
   const [error, setError] = useState<string>("")
   const [data, setData] = useState<any | null>(null)
   const [suites, setSuites] = useState<any[]>([])
-  const [renders, setRenders] = useState<any[]>([])
-  const [cmsGallery, setCmsGallery] = useState<string[]>([])
 
   useEffect(() => {
     const id = Number(params?.id || 0)
@@ -29,20 +29,24 @@ export default function PropertyDetailPage() {
     async function run() {
       setLoading(true)
       setError("")
-      try {
-        const [detail, st] = await Promise.all([
-          publicApi.getProperty(id),
-          publicApi.listPropertySuites(id),
-        ])
-        if (cancelled) return
-        if (detail) setData(detail)
-        else setError("Failed to load property")
+      const [detailResult, suitesResult] = await Promise.allSettled([
+        publicApi.getProperty(id),
+        publicApi.listPropertySuites(id),
+      ])
+      if (cancelled) return
+
+      const detail = detailResult.status === 'fulfilled' ? detailResult.value : null
+      const st = suitesResult.status === 'fulfilled' ? suitesResult.value : []
+
+      if (detail) {
+        setData(detail)
         setSuites(Array.isArray(st) ? st : [])
-        setRenders([])
-        setCmsGallery([])
-      } finally {
-        if (!cancelled) setLoading(false)
+      } else {
+        setError("Failed to load property")
+        setSuites([])
       }
+
+      if (!cancelled) setLoading(false)
     }
     run()
     return () => { cancelled = true }
@@ -81,73 +85,113 @@ export default function PropertyDetailPage() {
     return { total, available, floors, priceFrom, yieldPct }
   }, [data, suites])
 
+  const suitesForDisplay = useMemo(() => {
+    if (Array.isArray(data?.suites) && data.suites.length > 0) return data.suites
+    return Array.isArray(suites) ? suites : []
+  }, [data, suites])
+
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20">
-        <section className="text-text dark:text-white py-10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="mb-4">
-              <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Properties', href: '/properties' }, { label: data?.name || 'Property' }]} />
+      <main className="min-h-screen pt-24 bg-surface">
+        <div className="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12 py-8">
+          <div className="mb-8">
+            <Link 
+              href="/properties"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-text/60 hover:text-accent transition-colors mb-6"
+            >
+              <ArrowLeft className="w-4 h-4" /> Back to Properties
+            </Link>
+            <Breadcrumbs items={[{ label: 'Home', href: '/' }, { label: 'Properties', href: '/properties' }, { label: data?.name || 'Property Detail' }]} />
+          </div>
+
+          {loading ? (
+            <div className="animate-pulse space-y-8">
+              <div className="h-[60vh] bg-white/5 rounded-2xl"></div>
+              <div className="h-32 bg-white/5 rounded-2xl"></div>
+              <div className="h-96 bg-white/5 rounded-2xl"></div>
             </div>
-            {/* Hero Image */}
-            {images.length > 0 && (
-              <div className="relative h-72 md:h-96 rounded-2xl overflow-hidden mb-8 border">
-                <img src={images[0].url} alt={data?.name || 'Property image'} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
-              </div>
-            )}
-            {loading ? (
-              <p>Loading...</p>
-            ) : error ? (
-              <div className="text-red-600">{error}</div>
-            ) : (
-              <div className="space-y-10">
-                {/* Title + Meta */}
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-                  <div>
-                    <h1 className="text-3xl md:text-4xl font-heading font-bold">{data?.name}</h1>
-                    <p className="text-text/70 dark:text-white/70">
-                      {[data?.city, data?.state].filter(Boolean).join(', ')}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm text-text/60 dark:text-white/60">Starting from</p>
-                    <p className="text-3xl font-heading font-bold">{typeof data?.price_from === 'number' ? `₦${Math.round(data.price_from).toLocaleString()}` : '—'}</p>
+          ) : error ? (
+            <div className="text-center py-32 bg-white/5 rounded-2xl">
+              <p className="text-xl text-red-500 font-light mb-4">{error}</p>
+              <button onClick={() => window.location.reload()} className="text-accent hover:text-accent-dark text-sm font-semibold uppercase tracking-[0.15em]">Try Again</button>
+            </div>
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="space-y-16"
+            >
+              {/* Hero Section */}
+              <div className="relative h-[60vh] min-h-[500px] rounded-2xl overflow-hidden group">
+                <img 
+                  src={images[0]?.url || galleryImages[0]} 
+                  alt={data?.name || 'Property'} 
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-2000" 
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 right-0 p-8 lg:p-12">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
+                    <div className="max-w-3xl">
+                      <div className="flex items-center gap-2 text-white/90 mb-4">
+                        <MapPin className="w-4 h-4 text-accent" />
+                        <span className="text-sm font-light tracking-wide uppercase">
+                          {[data?.city, data?.state].filter(Boolean).join(', ')}
+                        </span>
+                      </div>
+                      <h1 className="text-4xl md:text-5xl lg:text-6xl font-heading font-light text-white tracking-tight mb-4">
+                        {data?.name}
+                      </h1>
+                      <p className="text-white/80 text-lg font-light leading-relaxed line-clamp-2 max-w-2xl">
+                        {data?.description}
+                      </p>
+                    </div>
+                    
+                    <div className="text-left md:text-right bg-black/40 backdrop-blur-md p-6 rounded-xl">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-2 font-semibold">Starting Price</p>
+                      <p className="text-4xl font-heading font-bold text-white tracking-tight">
+                        {metrics.priceFrom > 0 ? `₦${Math.round(metrics.priceFrom).toLocaleString()}` : 'Contact Us'}
+                      </p>
+                    </div>
                   </div>
                 </div>
+              </div>
 
-                {/* Metrics Row */}
+              {/* Metrics Row */}
+              <div className="bg-white/5 dark:bg-black/20 backdrop-blur-sm rounded-2xl p-2">
                 <ProjectStats
                   stats={[
                     { label: 'Total Units', value: metrics.total || 0 },
+                    { label: 'Available', value: metrics.available || 0 },
                     { label: 'Floors', value: metrics.floors || 0 },
-                    { label: 'Starting Price', value: Math.round(metrics.priceFrom || 0), prefix: '₦' },
-                    { label: 'Expected Yield', value: Math.round(metrics.yieldPct || 0), suffix: '%' },
+                    { label: 'Projected Yield', value: Math.round(metrics.yieldPct || 0), suffix: '%' },
                   ]}
                 />
+              </div>
 
-                {/* Interactive Floor Plan - Full Width */}
-                <section className="section-container">
-                  <div className="text-center mb-12">
-                    <h2 className="text-h2 font-heading font-bold mb-4">Interactive Floor Plan</h2>
-                    <p className="text-lg text-text/70 max-w-2xl mx-auto">
-                      Explore available suites by floor. Click a unit to view pricing and availability in real time.
+              {/* Description */}
+              {data?.description && (
+                <div className="grid md:grid-cols-3 gap-12 pt-8">
+                  <div className="md:col-span-1">
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-text/50 dark:text-white/50 mb-4">About the Property</h2>
+                  </div>
+                  <div className="md:col-span-2">
+                    <p className="text-lg text-text/80 dark:text-white/80 font-light leading-relaxed">
+                      {data.description}
                     </p>
                   </div>
-                  <InteractiveFloorPlan
-                    projectId={String(params?.id || '')}
-                    projectName={data?.name || 'Property'}
-                    propertyId={Number(params?.id || 0)}
-                  />
-                </section>
+                </div>
+              )}
 
-                {/* Virtual Tour & 3D View - Full Width */}
-                <section className="section-container bg-surface">
-                  <div className="text-center mb-12">
-                    <h2 className="text-h2 font-heading font-bold mb-4">Virtual Tour & 3D View</h2>
-                    <p className="text-lg text-text/70 max-w-2xl mx-auto">Experience the property in 3D or explore the photo gallery.</p>
-                  </div>
+              {/* Virtual Tour & 3D View */}
+              <div className="pt-8">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-heading font-light mb-4 tracking-tight">Virtual Tour & 3D View</h2>
+                  <p className="text-text/60 dark:text-white/60 font-light">Experience the property in immersive 3D.</p>
+                </div>
+                <div className="rounded-2xl overflow-hidden">
                   <PropertyViewer3D
                     propertyName={data?.name || 'Property'}
                     propertyId={String(params?.id || '')}
@@ -156,120 +200,39 @@ export default function PropertyDetailPage() {
                     images={galleryImages}
                     enableVirtualStaging={true}
                   />
-                </section>
-
-                {/* Gallery */}
-                {galleryImages.length > 0 && (
-                  <section className="section-container bg-surface">
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {galleryImages.map((src, idx) => (
-                        <div key={idx} className="rounded-xl overflow-hidden border">
-                          <img src={src} alt={(data?.name || 'Property') + ' image'} className="w-full h-64 object-cover" />
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Plans */}
-                {Array.isArray(data?.plans) && data.plans.length > 0 && (
-                  <section>
-                    <h2 className="text-2xl font-heading font-semibold mb-4">Plans & Renders</h2>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {data.plans.map((pl: any) => (
-                        <div key={pl.id} className="border rounded-lg overflow-hidden">
-                          {pl.image_url ? (
-                            <img src={pl.image_url} alt={pl.name} className="w-full h-48 object-cover" />
-                          ) : (
-                            <div className="w-full h-48 flex items-center justify-center bg-neutral-100 dark:bg-neutral-800 text-sm text-text/60 dark:text-white/60">
-                              {pl.type?.toUpperCase() || 'PLAN'}
-                            </div>
-                          )}
-                          <div className="p-4 flex items-center justify-between">
-                            <div>
-                              <p className="font-semibold">{pl.name}</p>
-                              <p className="text-xs text-text/60 dark:text-white/60">{pl.type || ''}{pl.is_interactive ? ' • Interactive' : ''}</p>
-                            </div>
-                            <div className="flex gap-2">
-                              {pl.plan_url && (
-                                <a className="px-3 py-2 border rounded" href={pl.plan_url} target="_blank">Open</a>
-                              )}
-                              {pl.file_url && (
-                                <a className="px-3 py-2 border rounded" href={pl.file_url} target="_blank">Download</a>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-                )}
-
-                {/* Suites */}
-                {Array.isArray(data?.suites) && data.suites.length > 0 && (
-                  <section>
-                    <h2 className="text-2xl font-heading font-semibold mb-4">Available Suites</h2>
-                    <div className="overflow-x-auto border rounded-lg">
-                      <table className="min-w-full text-sm">
-                        <thead>
-                          <tr className="bg-neutral-50 dark:bg-neutral-800">
-                            <th className="text-left p-3">Suite</th>
-                            <th className="text-left p-3">Type</th>
-                            <th className="text-left p-3">Size</th>
-                            <th className="text-left p-3">Floor</th>
-                            <th className="text-left p-3">Block</th>
-                            <th className="text-left p-3">Price</th>
-                            <th className="text-left p-3">Status</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {data.suites.map((s: any) => (
-                            <tr key={s.id} className="border-t">
-                              <td className="p-3">
-                                <div className="flex items-center gap-3">
-                                  {s.image_url ? (
-                                    <img src={s.image_url} alt={s.name} className="w-16 h-12 object-cover rounded" />
-                                  ) : <div className="w-16 h-12 bg-neutral-200 rounded" />}
-                                  <div>
-                                    <div className="font-medium">{s.name}</div>
-                                    <div className="text-xs text-text/60 dark:text-white/60">#{s.suite_number || ''}</div>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="p-3">{s.type || '—'}</td>
-                              <td className="p-3">{s.size_sqm ? `${s.size_sqm} sqm` : '—'}</td>
-                              <td className="p-3">{s.floor || '—'}</td>
-                              <td className="p-3">{s.block || '—'}</td>
-                              <td className="p-3">{typeof s.price === 'number' ? `₦${Math.round(s.price).toLocaleString()}` : '—'}</td>
-                              <td className="p-3">
-                                <span className={`px-2 py-1 rounded text-xs ${s.is_available ? 'bg-secondary text-white' : 'bg-neutral-300 text-neutral-700'}`}>
-                                  {s.is_available ? 'Available' : 'Unavailable'}
-                                </span>
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </section>
-                )}
-
-                {/* Investment & Amenities */}
-                <section className="section-container">
-                  <InvestmentROI projectId={String(params?.id || '')} />
-                </section>
-                <section className="section-container">
-                  <ProjectAmenities />
-                </section>
-
-                {/* Back to list */}
-                <div>
-                  <Link href="/properties" className="px-4 py-2 border rounded">Back to Properties</Link>
                 </div>
               </div>
-            )}
-          </div>
-        </section>
+
+              {/* Interactive Floor Plan */}
+              <div className="pt-8">
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl font-heading font-light mb-4 tracking-tight">Interactive Floor Plan</h2>
+                  <p className="text-text/60 dark:text-white/60 font-light">
+                    Explore available suites by floor. Click a unit to view pricing.
+                  </p>
+                </div>
+                <InteractiveFloorPlan
+                  projectId={String(params?.id || '')}
+                  projectName={data?.name || 'Property'}
+                  propertyId={Number(params?.id || 0)}
+                />
+              </div>
+
+              {/* Amenities & Investment */}
+              <div className="grid lg:grid-cols-2 gap-12 pt-8">
+                <div>
+                  <h2 className="text-2xl font-heading font-light mb-8 tracking-tight">Premium Amenities</h2>
+                  <ProjectAmenities />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-heading font-light mb-8 tracking-tight">Investment Analysis</h2>
+                  <InvestmentROI projectId={String(params?.id || '')} />
+                </div>
+              </div>
+
+            </motion.div>
+          )}
+        </div>
       </main>
       <Footer />
     </>

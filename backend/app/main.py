@@ -34,6 +34,7 @@ from .routers.documents_admin import router as documents_admin_router
 from .routers.reports import router as reports_router
 from .routers.websocket import router as websocket_router
 from .routers.payment_gateways import router as payment_gateways_router
+from .integrations.proxy_router import router as proxy_router
 
 # Create tables and ensure new columns for dev sqlite
 Base.metadata.create_all(bind=engine)
@@ -97,6 +98,7 @@ app.include_router(documents_admin_router)
 app.include_router(reports_router)
 app.include_router(websocket_router)
 app.include_router(payment_gateways_router)
+app.include_router(proxy_router)
 
 
 @app.get("/")

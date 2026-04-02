@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { z } from 'zod'
-import { getSession, hasPermission } from '@/lib/auth'
+import { getSession } from '@/lib/auth-server'
+import { hasPermission } from '@/lib/auth'
 
 const getSchema = z.object({ slug: z.string().min(1), key: z.string().min(1) })
 const postSchema = z.object({ slug: z.string().min(1), key: z.string().min(1), type: z.string().min(1), defaults: z.any() })

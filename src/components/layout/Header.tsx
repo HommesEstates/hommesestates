@@ -34,41 +34,41 @@ export function Header() {
     <header
       suppressHydrationWarning
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-colors duration-500 ease-in-out',
+        'fixed top-0 left-0 right-0 z-50 transition-all duration-700 ease-in-out',
         (isScrolled || mobileMenuOpen)
-          ? 'bg-white/90 dark:bg-neutral-900/85 backdrop-blur-[12px] border-b border-neutral-200/60 dark:border-neutral-800/60 shadow-md'
+          ? 'bg-white/80 dark:bg-[#030712]/90 backdrop-blur-2xl border-b border-gray-200 dark:border-white/10 shadow-sm'
           : 'bg-transparent dark:bg-transparent'
       )}
     >
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-20">
+      <nav className="max-w-[90rem] mx-auto px-6 sm:px-8 lg:px-12">
+        <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 group">
-            <div className="text-2xl font-heading font-bold">
-              <span className="text-text dark:text-white">Hommes</span>
+            <div className="text-2xl font-heading font-bold tracking-tight">
+              <span className="text-text dark:text-white transition-colors duration-300 group-hover:text-accent">Hommes</span>
               <span className="gradient-text"> Estates</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-10">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={cn(
-                  'text-sm font-semibold transition-colors relative group',
+                  'text-xs font-semibold uppercase tracking-[0.15em] transition-all duration-300 relative group py-2',
                   pathname === item.href
                     ? 'text-accent'
-                    : 'text-text/80 dark:text-white/80 hover:text-accent dark:hover:text-accent'
+                    : 'text-text/70 dark:text-white/70 hover:text-accent dark:hover:text-accent'
                 )}
               >
                 {item.name}
                 {pathname === item.href && (
                   <motion.div
                     layoutId="activeNav"
-                    className="absolute -bottom-1 left-0 right-0 h-0.5 bg-accent"
-                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    className="absolute bottom-0 left-0 right-0 h-[1px] bg-accent"
+                    transition={{ type: 'spring', stiffness: 400, damping: 35 }}
                   />
                 )}
               </Link>
@@ -76,32 +76,31 @@ export function Header() {
           </div>
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-6">
             {/* Theme Toggle */}
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
+              className="p-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors duration-300"
               aria-label="Toggle theme"
             >
-              <span className="relative inline-block w-5 h-5">
-                <Sun className="w-5 h-5 hidden dark:block" />
-                <Moon className="w-5 h-5 block dark:hidden" />
+              <span className="relative inline-block w-5 h-5 text-text/80 dark:text-white/80">
+                <Sun className="w-5 h-5 hidden dark:block transition-transform duration-500 hover:rotate-90" />
+                <Moon className="w-5 h-5 block dark:hidden transition-transform duration-500 hover:-rotate-90" />
               </span>
             </button>
 
             {/* Contact Button */}
             <Link
               href="/contact"
-              className="hidden lg:flex items-center gap-2 px-6 py-3 bg-copper-gradient text-white rounded-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+              className="hidden lg:flex items-center gap-2 px-7 py-3 bg-transparent border border-accent/30 text-accent hover:bg-accent/5 hover:border-accent transition-all duration-500 rounded-sm text-xs font-semibold uppercase tracking-[0.1em]"
             >
-              <Phone className="w-4 h-4" />
-              <span className="font-semibold">Get In Touch</span>
+              <span>Get In Touch</span>
             </Link>
 
             {/* Auth Buttons */}
-            <div className="hidden lg:flex items-center gap-2">
-              <Link href="/login" className="px-4 py-2 border rounded-lg font-semibold hover:bg-neutral-100 dark:hover:bg-neutral-800">Sign in</Link>
-              <Link href="/signup" className="px-4 py-2 bg-accent text-white rounded-lg font-semibold hover:opacity-90">Sign up</Link>
+            <div className="hidden lg:flex items-center gap-4 border-l border-border/50 pl-6 ml-2">
+              <Link href="/login" className="text-xs font-semibold uppercase tracking-[0.1em] text-text/70 dark:text-white/70 hover:text-accent transition-colors duration-300">Sign in</Link>
+              <Link href="/signup" className="text-xs font-semibold uppercase tracking-[0.1em] px-5 py-2.5 bg-text dark:bg-white text-white dark:text-black hover:bg-accent dark:hover:bg-accent hover:text-white transition-all duration-500 rounded-sm">Sign up</Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -128,7 +127,7 @@ export function Header() {
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="lg:hidden bg-white/90 dark:bg-transparent dark:[background-image:linear-gradient(180deg,#0B0D0F_0%,#1E1E1E_100%)] backdrop-blur-[12px] border-t border-neutral-200/60 dark:border-neutral-800/60"
+            className="lg:hidden bg-white/95 dark:bg-[#030712]/95 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10"
           >
             <div className="px-4 py-6 space-y-4">
               {navigation.map((item) => (

@@ -5,6 +5,12 @@
 		},
 		{
 			"path": "../../../../Program Files/Odoo 18.0.20250316/server/addons/real_estate"
+		},
+		{
+			"path": "../../../../Program Files/Odoo 18.0.20250316/server/addons/rest_api_odoo"
+		},
+		{
+			"path": "../../Downloads/property-explorer-main"
 		}
 	],
 	"settings": {}

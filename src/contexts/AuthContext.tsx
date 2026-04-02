@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
-import { fastAPI, User, AuthResponse } from '@/lib/fastapi'
+import { unifiedClient, User, AuthResponse } from '@/lib/unified-api'
 
 interface AuthContextType {
   user: User | null
@@ -32,14 +32,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(true)
       try {
         // Check if we have a token
-        if (fastAPI.isAuthenticated()) {
-          // Verify with backend
-          const currentUser = await fastAPI.getCurrentUser()
-          if (currentUser) {
+        const token = localStorage.getItem('he_access_token')
+        if (token) {
+          // Verify with backend by fetching user data
+          const currentUser = await unifiedClient.getMyOffers().then(() => ({
+            id: parseInt(localStorage.getItem('he_user_id') || '0'),
+            name: localStorage.getItem('he_user_name') || '',
+            email: localStorage.getItem('he_user_email') || '',
+            role: (localStorage.getItem('he_user_role') as any) || 'customer',
+            partner_id: parseInt(localStorage.getItem('he_partner_id') || '0')
+          })).catch(() => null)
+          
+          if (currentUser && currentUser.id) {
             setUser(currentUser)
           } else {
             // Token invalid, clear
-            fastAPI.clearAuth()
+            unifiedClient.logout()
           }
         }
       } catch (error) {
@@ -53,15 +61,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (username: string, password: string) => {
     try {
-      const result = await fastAPI.login(username, password)
-      if (result) {
-        const user = fastAPI.getUser()
-        setUser(user)
+      const result = await unifiedClient.login(username, password)
+      if (result && result.user) {
+        // Store user info in localStorage for persistence
+        localStorage.setItem('he_user_id', result.user.id.toString())
+        localStorage.setItem('he_user_name', result.user.name)
+        localStorage.setItem('he_user_email', result.user.email)
+        localStorage.setItem('he_user_role', result.user.role)
+        localStorage.setItem('he_partner_id', result.user.partner_id.toString())
+        
+        setUser(result.user)
         return { success: true }
       }
       return { success: false, error: 'Invalid credentials' }
     } catch (error: any) {
-      const message = error?.response?.data?.detail || 'Login failed'
+      const message = error?.message || 'Login failed'
       return { success: false, error: message }
     }
   }, [])
@@ -73,27 +87,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     phone?: string
   }) => {
     try {
-      const result = await fastAPI.signup(payload)
-      if (result && result.ok) {
-        return { success: true, partner_id: result.partner_id }
+      const result = await unifiedClient.signup(payload.name, payload.email, payload.phone || '', payload.password)
+      if (result && result.id) {
+        return { success: true, partner_id: result.id }
       }
       return { success: false, error: 'Signup failed' }
     } catch (error: any) {
-      const message = error?.response?.data?.detail || 'Signup failed'
+      const message = error?.message || 'Signup failed'
       return { success: false, error: message }
     }
   }, [])
 
   const logout = useCallback(async () => {
-    await fastAPI.logout()
+    unifiedClient.logout()
     setUser(null)
     router.push('/login')
   }, [router])
 
   const refreshUser = useCallback(async () => {
-    const currentUser = await fastAPI.getCurrentUser()
-    if (currentUser) {
-      setUser(currentUser)
+    // In unified client mode, user data is stored in localStorage
+    const userData = {
+      id: parseInt(localStorage.getItem('he_user_id') || '0'),
+      name: localStorage.getItem('he_user_name') || '',
+      email: localStorage.getItem('he_user_email') || '',
+      role: (localStorage.getItem('he_user_role') as any) || 'customer',
+      partner_id: parseInt(localStorage.getItem('he_partner_id') || '0')
+    }
+    if (userData.id) {
+      setUser(userData as User)
     }
   }, [])
 

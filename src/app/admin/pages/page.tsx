@@ -90,9 +90,14 @@ export default async function PagesListPage() {
                   </div>
                 </td>
                 <td className="p-4 text-right">
-                  <Link href={`/admin/pages/${p.id}`} className="px-3 py-2 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800">
-                    Edit
-                  </Link>
+                  <div className="flex items-center justify-end gap-2">
+                    <Link href={`/admin/content-editor?pageId=${p.id}`} className="px-3 py-2 rounded-lg bg-accent text-white hover:bg-accent-dark transition-colors text-sm font-medium">
+                      Visual Editor
+                    </Link>
+                    <Link href={`/admin/pages/${p.id}`} className="px-3 py-2 rounded-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-sm">
+                      Classic
+                    </Link>
+                  </div>
                 </td>
               </tr>
             ))}
