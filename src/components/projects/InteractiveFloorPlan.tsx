@@ -321,7 +321,7 @@ export function InteractiveFloorPlan({
                     return (
                       <button
                         key={block}
-                        onClick={() => { setSelectedBlock(block); setSelectedSuite(null); setShowOfferForm(false); }}
+                        onClick={() => { setSelectedBlock(block); setSelectedUnit(null); setShowOfferForm(false); }}
                         className={`relative w-full py-3 px-4 rounded-xl text-xs uppercase tracking-[0.15em] font-medium transition-all duration-300 ${
                           isSelected 
                             ? 'text-orange-600 dark:text-orange-400 bg-orange-500/10 border border-orange-500/30 dark:border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]' 
@@ -350,7 +350,7 @@ export function InteractiveFloorPlan({
                     return (
                       <button
                         key={floor}
-                        onClick={() => { setSelectedFloor(floor); setSelectedSuite(null); setShowOfferForm(false); }}
+                        onClick={() => { setSelectedFloor(floor); setSelectedUnit(null); setShowOfferForm(false); }}
                         className={`relative w-full flex items-center justify-between p-4 rounded-2xl transition-all duration-500 overflow-hidden group ${
                           isSelected ? 'bg-white dark:bg-white/10 border border-gray-200 dark:border-white/20 shadow-sm dark:shadow-[0_0_20px_rgba(255,255,255,0.05)]' : 'bg-transparent border border-transparent hover:bg-gray-100 dark:hover:bg-white/5'
                         }`}
