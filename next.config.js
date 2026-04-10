@@ -16,6 +16,7 @@ const nextConfig = {
     formats: ['image/webp', 'image/avif'],
   },
   outputFileTracingRoot: process.cwd(),
+  turbopack: {},
   async rewrites() {
     const raw = process.env.NEXT_PUBLIC_ODOO_API_URL || ''
     const trimmed = raw.replace(/\/$/, '')
